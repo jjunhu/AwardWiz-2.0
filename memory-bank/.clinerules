@@ -1,0 +1,91 @@
+# AwardWiz Project Rules and Patterns
+
+## Code Organization
+
+1. **Scraper Module Pattern**: All scrapers follow a consistent pattern with:
+   - `meta` export defining scraper metadata and URL patterns to block
+   - `runScraper` export as the main entry point
+   - Standardized return format using FlightWithFares interface
+   - Consistent error handling pattern
+
+2. **Frontend Component Structure**:
+   - React functional components with hooks
+   - React Query for data fetching and state management
+   - Custom hooks for encapsulating business logic
+
+## Implementation Guidelines
+
+1. **Anti-Botting Strategy**: 
+   - Prefer direct API calls over DOM manipulation when possible
+   - Use `arkalis.evaluate()` for page interactions when needed
+   - Implement random delays between actions
+   - Use proper HTML parsing techniques, not string search/replace
+
+2. **Error Handling Pattern**:
+   - Catch specific error types and convert to standardized format
+   - Include descriptive error messages
+   - Preserve error context (e.g., airline name, route)
+   - Pass through log lines for debugging
+
+3. **Caching Strategy**:
+   - Cache responses with appropriate TTL (default 1 hour)
+   - Use route-specific cache keys
+   - Implement cache invalidation for changing data
+
+## AWS Integration Approach
+
+1. **Lambda Implementation**:
+   - Use container images for Lambda functions when running Arkalis
+   - Keep handler functions minimal, with business logic in separate modules
+   - Use environment variables for configuration
+   - Implement proper timeouts and memory allocation
+
+2. **DynamoDB Schema Design**:
+   - Use composite keys for efficient querying
+   - Implement sparse indexes for secondary access patterns
+   - Follow single-table design principles
+   - Include timestamp fields for TTL management
+
+3. **SNS Notification Strategy**:
+   - Create separate topics for different notification types
+   - Use message attributes for filtering
+   - Implement proper error handling for failed deliveries
+   - Add retries for transient failures
+
+## Known Challenges
+
+1. **Scraper Maintenance**:
+   - Airlines frequently change their website structure
+   - Scrapers need regular testing and updates
+   - Some airlines actively block automated access
+   - Approach: Implement monitoring and automated testing
+
+2. **Performance Considerations**:
+   - Headless browsers are resource-intensive
+   - Cold starts can be slow in serverless environment
+   - Consider Lambda provisioned concurrency for critical paths
+   - Optimize response caching to reduce scraping frequency
+
+3. **Rate Limiting**:
+   - Airlines may block IPs with too many requests
+   - Implement progressive backoff for failed requests
+   - Consider IP rotation for high-volume scenarios
+   - Balance user experience vs. scraper reliability
+
+## Testing Strategy
+
+1. **Scraper Tests**:
+   - Create snapshot tests using recorded responses
+   - Implement integration tests for scraper endpoints
+   - Set up monitoring to detect broken scrapers
+   - Test with various edge cases (no availability, errors, etc.)
+
+2. **AWS Infrastructure Tests**:
+   - Create unit tests for Lambda functions
+   - Set up integration tests for full notification flow
+   - Use LocalStack for local AWS service testing
+   - Implement synthetic monitoring for production
+
+## Code Patterns to Follow
+
+to be updated 
