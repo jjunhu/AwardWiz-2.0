@@ -9,19 +9,29 @@ const exec = promisify(execNoPromise)
 
 export const arkalisBrowser = async (arkalis: ArkalisCore) => {
   async function genWindowCoords() {
-    const screenResolution = await exec("xdpyinfo | grep dimensions")
-    const rawRes = / (?<res>\d+x\d+) /u.exec(screenResolution.stdout)?.groups?.["res"]?.trim().split("x")
-    if (!rawRes || rawRes.length !== 2)
-      throw new Error("Unable to get screen resolution")
-    const res = (rawRes as [string, string]).map(num => parseInt(num)) as [number, number]
-    const size = [Math.ceil(res[0] * (Math.random() * 0.2 + 0.8)), Math.ceil(res[1] * (Math.random() * 0.2 + 0.8))] as const
-    return {
-      size,
-      pos: [Math.ceil((res[0] - size[0]) * Math.random()), Math.ceil((res[1] - size[1]) * Math.random())] as const
+    try {
+      const screenResolution = await exec("xdpyinfo | grep dimensions")
+      const rawRes = / (?<res>\d+x\d+) /u.exec(screenResolution.stdout)?.groups?.["res"]?.trim().split("x")
+      if (!rawRes || rawRes.length !== 2) {
+        throw new Error("Unable to get screen resolution")
+      }
+      const res = (rawRes as [string, string]).map(num => parseInt(num)) as [number, number]
+      const size = [Math.ceil(res[0] * (Math.random() * 0.2 + 0.8)), Math.ceil(res[1] * (Math.random() * 0.2 + 0.8))] as const
+      return {
+        size,
+        pos: [Math.ceil((res[0] - size[0]) * Math.random()), Math.ceil((res[1] - size[1]) * Math.random())] as const
+      }
+    } catch (error) {
+      // Fallback to a standard size when xdpyinfo is not available
+      arkalis.log("Using fallback window size due to missing xdpyinfo")
+      return {
+        size: [1920, 1080] as const,
+        pos: [0, 0] as const
+      }
     }
   }
 
-  // generate a random window size
+  // generate a window size (or use fallback)
   const window = await genWindowCoords()
 
   // these domains are used by the browser when creating a new profile

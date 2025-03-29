@@ -14,13 +14,14 @@ import rateLimit from "express-rate-limit"
 dotenv.config()
 
 const debugOptions: DebugOptions = {
-  useProxy: true,
+  useProxy: false, // Disabling proxy to avoid xdpyinfo dependency
   globalBrowserCacheDir: process.env["TMP_PATH"] ? path.join(process.env["TMP_PATH"], "browser-cache") : "./tmp/browser-cache",
   browserDebug: false,
   showRequests: false,
   liveLog: (prettyLine: string, id: string) => logger.info(prettyLine, { id }),
   winston: logger,
   useResultCache: true,
+  defaultResultCacheTtl: 3600, // Cache results for 1 hour (in seconds)
   globalCachePath: process.env["TMP_PATH"] ? path.join(process.env["TMP_PATH"], "arkalis-cache") : "./tmp/arkalis-cache"
 }
 

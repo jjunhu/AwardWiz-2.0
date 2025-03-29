@@ -8,43 +8,67 @@ export const meta: ScraperMetadata = {
 }
 
 export const runScraper: AwardWizScraper = async (arkalis, query) => {
-  const url = "https://www.aa.com/booking/find-flights"
+  // Navigate directly to the search results page
+  const url = `https://www.aa.com/booking/find-flights?d=${query.departureDate}&f=${query.origin}&t=${query.destination}&c=1&a=1&ss=1&type=award`
   arkalis.goto(url)
-  await arkalis.waitFor({ "success": { type: "url", url, onlyStatusCode: 200, othersThrow: true }})
+  
+  // Wait for the page to load
+  await arkalis.waitFor({
+    "success": { type: "html", html: "American Airlines" },
+    "error": { type: "html", html: "error" }
+  })
+  
+  // Wait a moment for the page to initialize
+  await arkalis.wait(5000)
 
-  arkalis.log("fetching itinerary")
-  const fetchRequest = {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "accept": "application/json, text/plain, */*",
-      "accept-language": "en-US,en;q=0.9"
-    },
-    body: JSON.stringify({
-      "metadata": { "selectedProducts": [], "tripType": "OneWay", "udo": {} },
-      "passengers": [{ "type": "adult", "count": 1 }],
-      "queryParams": { "sliceIndex": 0, "sessionId": "", "solutionId": "", "solutionSet": "" },
-      "requestHeader": { "clientId": "AAcom" },
-      "slices": [{
-        "allCarriers": true,
-        "cabin": "",
-        "connectionCity": undefined,
-        "departureDate": query.departureDate,
-        "destination": query.destination,
-        "includeNearbyAirports": false,
-        "maxStops": undefined,
-        "origin": query.origin,
-        "departureTime": "040001"
-      }],
-      "tripOptions": { "locale": "en_US", "searchType": "Award" },
-      "loyaltyInfo": undefined
-    })
+  arkalis.log("fetching flight data directly")
+  
+  // Execute the API call directly and get the response
+  const requestData = {
+    metadata: { selectedProducts: [], tripType: "OneWay", udo: {} },
+    passengers: [{ type: "adult", count: 1 }],
+    queryParams: { sliceIndex: 0, sessionId: "", solutionId: "", solutionSet: "" },
+    requestHeader: { clientId: "AAcom" },
+    slices: [{
+      allCarriers: true,
+      cabin: "",
+      departureDate: query.departureDate,
+      destination: query.destination,
+      includeNearbyAirports: false,
+      origin: query.origin,
+      departureTime: "040001"
+    }],
+    tripOptions: { locale: "en_US", searchType: "Award" }
+  };
+  
+  // Use evaluate to execute the fetch call and get the response directly
+  // This is more reliable than waiting for network events
+  const responseText = await arkalis.evaluate<string>(`
+    (async () => {
+      try {
+        const response = await fetch("https://www.aa.com/booking/api/search/itinerary", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json, text/plain, */*"
+          },
+          body: JSON.stringify(${JSON.stringify(requestData)})
+        });
+        
+        return await response.text();
+      } catch (error) {
+        return JSON.stringify({ error: error.message });
+      }
+    })()
+  `);
+  
+  // Parse the JSON response
+  let json: AAResponse;
+  try {
+    json = JSON.parse(responseText) as AAResponse;
+  } catch (e) {
+    throw new Error(`Failed to parse API response: ${responseText}`);
   }
-
-  const cmd = `fetch("https://www.aa.com/booking/api/search/itinerary", ${JSON.stringify(fetchRequest)});`
-  void arkalis.evaluate(cmd)
-  const xhrResponse = await arkalis.waitFor({ "search": { type: "url", url: "https://www.aa.com/booking/api/search/itinerary" }})
-  const json = JSON.parse(xhrResponse.response!.body) as AAResponse
 
   // aa can return errors in two ways
   if ((json.errorNumber ?? 0) > 0) {

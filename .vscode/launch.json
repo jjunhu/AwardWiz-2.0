@@ -10,11 +10,21 @@
       "args": "${input:run-scraper-params}",
       "envFile": "${workspaceFolder}/.env",
       "request": "launch",
-      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "skipFiles": [
+        "<node_internals>/**",
+        "**/node_modules/**"
+      ],
       "type": "node",
       "preLaunchTask": "tsc: build - tsconfig.json",
       "console": "integratedTerminal",
-      "internalConsoleOptions": "openOnSessionStart",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+      "name": "Docker Node.js Launch",
+      "type": "docker",
+      "request": "launch",
+      "preLaunchTask": "docker-run: debug",
+      "platform": "node"
     }
   ],
   "inputs": [

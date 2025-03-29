@@ -7,7 +7,7 @@ dotenv.config()
 
 const options: DebugOptions = {
   maxAttempts: 1,
-  useProxy: true,
+  useProxy: false, // Disabling proxy to avoid xdpyinfo dependency
   pauseAfterRun: false,
   pauseAfterError: true,
   drawMousePath: false,
@@ -16,6 +16,7 @@ const options: DebugOptions = {
 
   useResultCache: true,
   globalCachePath: "./tmp/arkalis-cache",
+  defaultResultCacheTtl: 3600, // Cache results for 1 hour (in seconds)
   browserDebug: true
 }
 
