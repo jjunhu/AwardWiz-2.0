@@ -39,7 +39,7 @@ export const runScraper: AwardWizScraper = async (arkalis, query) => {
       departureTime: "040001"
     }],
     tripOptions: { locale: "en_US", searchType: "Award" }
-  };
+  }
   
   // Use evaluate to execute the fetch call and get the response directly
   // This is more reliable than waiting for network events
@@ -60,14 +60,14 @@ export const runScraper: AwardWizScraper = async (arkalis, query) => {
         return JSON.stringify({ error: error.message });
       }
     })()
-  `);
+  `)
   
   // Parse the JSON response
-  let json: AAResponse;
+  let json: AAResponse
   try {
-    json = JSON.parse(responseText) as AAResponse;
+    json = JSON.parse(responseText) as AAResponse
   } catch (e) {
-    throw new Error(`Failed to parse API response: ${responseText}`);
+    throw new Error(`Failed to parse API response: ${responseText}`)
   }
 
   // aa can return errors in two ways

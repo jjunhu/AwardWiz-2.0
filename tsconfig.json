@@ -7,8 +7,8 @@
     "esModuleInterop": true,                // also enables allowSyntheticDefaultImports (allows for importing default exports)
 
     "forceConsistentCasingInFileNames": true,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "resolveJsonModule": true,             // allows for importing .json files (and creating the schema)
     "isolatedModules": true,
 
