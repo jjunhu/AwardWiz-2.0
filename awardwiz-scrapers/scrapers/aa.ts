@@ -135,9 +135,9 @@ const standardizeResults = (slices: Slice[], query: AwardWizQuery): FlightWithFa
     }
 
     if (slice.segments.length > 1)
-      return
+      return undefined
     if (segment.origin.code !== query.origin || segment.destination.code !== query.destination)
-      return
+      return undefined
 
     return result
   }).filter((result): result is FlightWithFares => !!result)
